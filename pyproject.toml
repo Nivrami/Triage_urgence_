@@ -1,0 +1,65 @@
+[project]
+name = "triage-urgence"
+version = "1.0.0"
+description = "Système de triage médical intelligent avec LLM et RAG"
+requires-python = ">=3.10"
+
+# -----------------------------------------------------------------------------
+# Black - Configuration du formateur
+# -----------------------------------------------------------------------------
+[tool.black]
+line-length = 100
+target-version = ['py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.git
+    | \.venv
+    | venv
+    | __pycache__
+    | data
+    | \.pytest_cache
+)/
+'''
+
+# -----------------------------------------------------------------------------
+# Pylint - Configuration du linter
+# -----------------------------------------------------------------------------
+[tool.pylint.main]
+ignore-paths = ["data", "venv", ".venv", "__pycache__"]
+jobs = 0  # Utilise tous les CPU disponibles
+
+[tool.pylint.messages_control]
+disable = [
+    "C0114",  # missing-module-docstring
+    "C0115",  # missing-class-docstring
+    "C0116",  # missing-function-docstring
+    "R0903",  # too-few-public-methods
+    "W0703",  # broad-except (parfois nécessaire)
+]
+
+[tool.pylint.format]
+max-line-length = 100
+
+[tool.pylint.design]
+max-args = 10
+max-locals = 20
+
+# -----------------------------------------------------------------------------
+# Pytest - Configuration des tests
+# -----------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+# -----------------------------------------------------------------------------
+# MyPy - Configuration du type checking
+# -----------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+exclude = ["data", "venv", ".venv"]

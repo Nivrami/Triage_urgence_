@@ -1,0 +1,30 @@
+# Env
+.env
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Data
+data/vectors/
+data/processed/
+data/test_*/
+*.csv
+*.json
+
+# IDE
+.vscode/
+.idea/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Misc
+.DS_Store
+*.log

@@ -1,0 +1,78 @@
+
+python-dotenv==1.0.0           # Gestion variables d'environnement
+pydantic==2.5.0                # Validation et modèles de données
+pydantic-settings==2.1.0       # Settings avec Pydantic
+
+# -----------------------------------------------------------------------------
+# LLM & API
+# -----------------------------------------------------------------------------
+# Providers LLM
+openai==1.6.1
+anthropic==0.8.0
+langchain==0.1.0
+langchain-community==0.0.10    # Intégrations communautaires
+langchain-openai==0.0.2        # OpenAI pour LangChain
+langchain-anthropic==0.0.1     # Anthropic pour LangChain
+
+# MCP & Agents
+langgraph==0.0.20
+langsmith==0.0.77
+
+# -----------------------------------------------------------------------------
+# RAG & Embeddings
+# -----------------------------------------------------------------------------
+# Vector Stores
+chromadb==0.4.22
+faiss-cpu==1.7.4
+
+# Embeddings
+sentence-transformers==2.2.2
+huggingface-hub==0.20.0
+DocumentLoader
+
+# Document Processing
+pypdf==3.17.4
+python-docx==1.1.0
+beautifulsoup4==4.12.2
+lxml==5.1.0
+unstructured==0.11.6
+
+# -----------------------------------------------------------------------------
+# Machine Learning
+# -----------------------------------------------------------------------------
+scikit-learn==1.3.2            # ML classique
+xgboost==2.0.3                 # Gradient boosting
+pandas==2.1.4                  # Manipulation données
+numpy==1.26.2                  # Calcul numérique
+joblib==1.3.2                  # Sérialisation modèles
+plotly==5.18.0                 # Visualisation données
+
+# -----------------------------------------------------------------------------
+# Interface Web
+# -----------------------------------------------------------------------------
+streamlit==1.29.0              # Interface web
+streamlit-chat==0.1.1          # Composants chat
+plotly==5.18.0                 # Graphiques interactifs
+altair==5.2.0                  # Visualisations
+
+
+# Utilities
+# -----------------------------------------------------------------------------
+requests==2.31.0               # HTTP requests
+httpx==0.26.0                  # HTTP client async
+tqdm==4.66.1                   # Barres de progression
+python-dateutil==2.8.2         # Manipulation dates
+pytz==2023.3                   # Fuseaux horaires
+
+# -----------------------------------------------------------------------------
+# Development Tools
+# -----------------------------------------------------------------------------
+black==23.12.1                 # Code formatter
+pylint==3.0.3                  # Linter
+pre-commit==3.6.0              # Git hooks automatiques
+pytest==7.4.3                  # Tests unitaires
+pytest-asyncio==0.21.1         # Tests async
+pytest-cov==4.1.0              # Coverage tests
+jupyter==1.0.0                 # Notebooks
+ipykernel==6.27.1              # Kernel Jupyter
+mypy==1.7.1                    # Type checking

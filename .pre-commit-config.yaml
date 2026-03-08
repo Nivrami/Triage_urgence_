@@ -1,0 +1,33 @@
+# Configuration des hooks pre-commit
+# Documentation: https://pre-commit.com/
+
+repos:
+  # Black - Formateur de code Python
+  - repo: https://github.com/psf/black
+    rev: 24.4.2
+    hooks:
+      - id: black
+        language_version: python3
+        args: ['--line-length=100']  # Longueur max des lignes
+
+  # Pylint - Analyseur statique
+  - repo: local
+    hooks:
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: system
+        types: [python]
+        args:
+          - '--disable=C0114,C0115,C0116'  # Désactive les warnings de docstrings manquantes
+          - '--max-line-length=100'
+          - '--fail-under=7.0'  # Score minimum requis (sur 10)
+
+  # Vérifications basiques
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace      # Supprime les espaces en fin de ligne
+      - id: end-of-file-fixer        # Assure une ligne vide en fin de fichier
+      - id: check-yaml               # Vérifie la syntaxe YAML
+      - id: check-added-large-files  # Bloque les gros fichiers (>500kb)
