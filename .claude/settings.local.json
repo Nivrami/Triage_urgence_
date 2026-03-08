@@ -18,7 +18,9 @@
       "Bash(git commit:*)",
       "Bash(streamlit run:*)",
       "Bash(Get-ChildItem -Recurse -Directory -Filter \"__pycache__\")",
-      "Bash(python -c \":*)"
+      "Bash(python -c \":*)",
+      "Bash(jupyter nbconvert --to script \"c:/Users/marvi/Desktop/Projet_LLM/Triage_urgence_bis/notebooks/train_SIMPLE_model.ipynb\" --stdout)",
+      "Bash(jupyter nbconvert --to script \"c:/Users/marvi/Desktop/Projet_LLM/Triage_urgence_bis/notebooks/generate_dataset_FIXED.ipynb\" --stdout)"
     ]
   }
 }

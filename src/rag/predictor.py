@@ -47,7 +47,7 @@ class MLTriagePredictor:
         symptoms = chatbot_summary.get("symptoms", [])
 
         # ML prediction
-        features = self._prep_features(patient, vitals)
+        features = self._prep_features(patient, vitals, symptoms)
 
         if not self.model or not features:
             return self._fallback(symptoms, vitals)
@@ -185,10 +185,45 @@ class MLTriagePredictor:
 
         return result
 
-    def _prep_features(self, patient: Dict, vitals: Dict) -> List[float]:
-        """[FC, FR, SpO2, TA_sys, TA_dia, Temp, Age, Sex]."""
+    # Ordre fixe des 10 symptômes binaires — doit correspondre au dataset v2
+    SYMPTOMES_CLES = [
+        "douleur thoracique",
+        "dyspnée",
+        "perte de connaissance",
+        "hémorragie",
+        "fracture",
+        "fièvre élevée",
+        "douleur abdominale",
+        "nausée vomissement",
+        "symptôme mineur",
+        "pas urgence",
+    ]
+
+    SYMPTOMES_KEYWORDS = {
+        "douleur thoracique":    ["thoracique", "poitrine", "thorax", "cardiaque"],
+        "dyspnée":               ["dyspnée", "dyspnee", "respir", "souffle", "essoufflement", "étouffement", "détresse respiratoire"],
+        "perte de connaissance": ["connaissance", "syncope", "évanouissement", "inconscient"],
+        "hémorragie":            ["hémorragie", "saignement", "hémoptysie", "rectorragie", "hématurie", "épistaxis"],
+        "fracture":              ["fracture", "cassure", "traumatisme osseux"],
+        "fièvre élevée":         ["fièvre", "hyperthermie", "fébril"],
+        "douleur abdominale":    ["abdomin", "ventre", "estomac", "intestin", "colique"],
+        "nausée vomissement":    ["nausée", "vomissement", "vomit", "nausées", "vomissements"],
+        "symptôme mineur":       ["entorse", "otite", "conjonctivite", "migraine", "angine", "pharyngite", "urticaire", "lombalgie", "rhinite"],
+        "pas urgence":           ["certificat", "ordonnance", "rhume", "résultats", "courbatures", "fatigue", "bilan"],
+    }
+
+    def _encode_symptomes(self, symptoms: List[str]) -> List[int]:
+        """Encode une liste de symptômes en 10 features binaires."""
+        text = " ".join(symptoms).lower() if symptoms else ""
+        return [
+            int(any(kw in text for kw in self.SYMPTOMES_KEYWORDS[s]))
+            for s in self.SYMPTOMES_CLES
+        ]
+
+    def _prep_features(self, patient: Dict, vitals: Dict, symptoms: List[str] = None) -> List[float]:
+        """[FC, FR, SpO2, TA_sys, TA_dia, Temp, Age, Sex, + 10 symptômes binaires] = 18 features."""
         try:
-            return [
+            constantes = [
                 vitals.get("FC", 75),
                 vitals.get("FR", 16),
                 vitals.get("SpO2", 98),
@@ -198,6 +233,8 @@ class MLTriagePredictor:
                 patient.get("age", 40),
                 1 if patient.get("sex") in ["Homme", "H"] else 0,
             ]
+            symptomes_bin = self._encode_symptomes(symptoms or [])
+            return constantes + symptomes_bin
         except:
             return None
 
