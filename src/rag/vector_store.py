@@ -2,13 +2,21 @@
 Vector Store - Gestion de la base vectorielle ChromaDB
 """
 
+import os
 import chromadb
 from chromadb.config import Settings
-from sentence_transformers import SentenceTransformer
 from typing import List, Dict, Optional
+from .embeddings import EmbeddingProvider
 from pathlib import Path
 import json
 from .document_loader import DocumentLoader
+from dotenv import load_dotenv
+
+load_dotenv()
+
+_DEFAULT_EMBEDDING_MODEL = os.getenv(
+    "EMBEDDING_MODEL", "paraphrase-multilingual-MiniLM-L12-v2"
+)
 
 
 class VectorStore:
@@ -18,7 +26,7 @@ class VectorStore:
         self,
         persist_directory: str = "data/vector_db",
         collection_name: str = "triage_medical",
-        embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+        embedding_model: str = _DEFAULT_EMBEDDING_MODEL,
     ):
         """
         Args:
@@ -35,9 +43,9 @@ class VectorStore:
             settings=Settings(anonymized_telemetry=False, allow_reset=True),
         )
 
-        # Charger le modele d'embeddings
+        # Charger le modele d'embeddings via EmbeddingProvider
         print(f"[INFO] Chargement modele embeddings: {embedding_model}")
-        self.embedding_model = SentenceTransformer(embedding_model)
+        self.embedding_model = EmbeddingProvider(model_name=embedding_model)
         print("[OK] Modele charge")
 
         # Créer ou récupérer collection
@@ -81,7 +89,7 @@ class VectorStore:
         ids = []
 
         for i, chunk in enumerate(chunks):
-            documents.append(chunk["content"])
+            documents.append(chunk.get("content") or chunk.get("text", ""))
 
             # ChromaDB nécessite metadata en dict simple (pas de nested)
             metadata = {
@@ -95,9 +103,7 @@ class VectorStore:
 
         # Generer embeddings
         print("[INFO] Generation des embeddings...")
-        embeddings = self.embedding_model.encode(
-            documents, show_progress_bar=True, convert_to_numpy=True
-        ).tolist()
+        embeddings = self.embedding_model.embed_batch(documents)
 
         # Ajouter a ChromaDB
         print("[INFO] Ajout a ChromaDB...")
@@ -123,7 +129,7 @@ class VectorStore:
             Liste de résultats avec scores
         """
         # Générer embedding de la query
-        query_embedding = self.embedding_model.encode([query], convert_to_numpy=True).tolist()[0]
+        query_embedding = self.embedding_model.embed_text(query)
 
         # Rechercher
         results = self.collection.query(
@@ -259,8 +265,9 @@ def build_vector_store(
         vector_store.clear_collection()
 
     print("\n[INFO] Chargement des documents...")
-    loader = DocumentLoader(documents_dir)
-    chunks = loader.load_and_chunk_all(chunk_size=800, overlap=150)
+    loader = DocumentLoader(chunk_size=800, chunk_overlap=150)
+    documents = loader.load_from_directory(documents_dir)
+    chunks = loader.chunk_documents(documents)
 
     print("\n[INFO] Indexation dans ChromaDB...")
     vector_store.add_documents(chunks)

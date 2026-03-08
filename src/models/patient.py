@@ -115,15 +115,6 @@ class Constantes(BaseModel):
         vector.append(self.temperature if self.temperature is not None else -1)
         return vector
 
-    def has_critical_values(self) -> bool:
-        """Vérifie si des valeurs sont critiques (hors normes)."""
-        #
-        pass
-
-    def get_anomalies(self) -> list[str]:
-        """Retourne la liste des constantes anormales."""
-        pass
-
 
 class Patient(BaseModel):
     """Modèle complet d'un patient aux urgences."""
@@ -221,6 +212,4 @@ class Patient(BaseModel):
                 summary += f"  - Température: {self.constantes.temperature} °C\n"
         return summary
 
-    def merge_with(self, other_data: dict) -> "Patient":
-        """Fusionne avec de nouvelles données extraites."""
-        pass
+

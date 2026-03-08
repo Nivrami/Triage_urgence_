@@ -15,7 +15,7 @@ class MLTriagePredictor:
     def __init__(self, model_path: str = None, rag_retriever=None):
         # Modèle ML
         if model_path is None:
-            model_path = Path(__file__).parent.parent / "models" / "random_forest_simple.pkl"
+            model_path = Path(__file__).parent.parent.parent / "data" / "models" / "random_forest_simple.pkl"
 
         try:
             self.model = joblib.load(model_path)

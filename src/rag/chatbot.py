@@ -15,9 +15,10 @@ load_dotenv()
 class TriageChatbotAPI:
     """Chatbot Mistral API robuste avec tracking complet."""
 
-    def __init__(self, api_key: str = None, retriever=None):
+    def __init__(self, api_key: str = None, retriever=None, max_questions: int = 5):
         self.api_key = api_key or os.getenv("MISTRAL_API_KEY")
         self.retriever = retriever  # RAG retriever
+        self.max_questions = max_questions
         if self.api_key:
             self.client = Mistral(api_key=self.api_key)
             self.use_api = True
@@ -30,18 +31,29 @@ class TriageChatbotAPI:
         self.reset()
 
     def start(self) -> str:
+        """Premier message du chatbot. Si identité déjà connue, demande directement le motif."""
+        has_identity = self.data.get("age") and self.data.get("sex")
+        if has_identity:
+            name = self.data.get("name")
+            greeting = f"Bonjour {name}. " if name else "Bonjour. "
+            return greeting + "Qu'est-ce qui vous amène aujourd'hui ?"
         return "Bonjour. Indiquez : prénom, âge, sexe\nExemple : Jean, 25 ans, homme"
 
     def chat(self, msg: str) -> str:
         """Chat principal avec tracking."""
         start = time.time()
         self.data["messages"].append({"role": "user", "content": msg})
+        self.data["question_count"] = self.data.get("question_count", 0) + 1
 
         # Extraire données
         self._extract(msg)
 
         # Déterminer étape suivante
         next_step = self._get_next_step()
+
+        # Si on a atteint le nombre max de questions et que les infos essentielles sont là
+        if self.data["question_count"] >= self.max_questions and next_step not in ("identity",):
+            next_step = "done"
 
         # Générer réponse
         if self.use_api and self.data.get("age") and next_step != "identity":
@@ -76,6 +88,11 @@ class TriageChatbotAPI:
             return "spo2"
         if "FR" not in v:
             return "fr"
+
+        # Toutes les constantes sont collectées — si on a encore des questions à poser, approfondir
+        q = self.data.get("question_count", 0)
+        if q < self.max_questions:
+            return "followup"
 
         return "done"
 
@@ -126,6 +143,10 @@ Sois direct.""",
 IMPORTANT: L'exemple DOIT inclure l'unité /min pour que le système reconnaisse la valeur.
 Exemple à donner: "16/min" ou "16 respirations par minute"
 Concis et clair.""",
+                "followup": """Tu es un assistant médical empathique. Toutes les constantes vitales sont déjà connues.
+Pose une question de suivi pertinente pour mieux comprendre la situation clinique du patient :
+durée des symptômes, intensité (sur 10), antécédents médicaux, traitements en cours, allergies, ou contexte d'apparition.
+Adapte ta question aux symptômes déjà décrits. Sois bref et empathique.""",
                 "done": """Toutes les informations sont collectées.
 Informe le patient que son dossier est complet et qu'il peut obtenir une prédiction.
 Sois rassurant et professionnel.
@@ -144,16 +165,27 @@ Contexte médical de référence (utilise ces informations pour guider tes quest
             # Contexte des données déjà collectées
             context = self._build_context()
 
+            # Pour followup : passer l'historique réel de la conversation
+            if step == "followup":
+                history_text = "\n".join(
+                    f"{'Patient' if m['role'] == 'user' else 'Infirmier'}: {m['content']}"
+                    for m in self.data["messages"][-10:]
+                )
+                user_content = (
+                    f"Contexte patient: {context}\n\n"
+                    f"Conversation jusqu'ici:\n{history_text}\n\n"
+                    f"En tenant compte de tout ce qui précède, pose la prochaine question."
+                )
+            else:
+                user_content = f"Contexte patient: {context}\n\nQuelle est ta question ?"
+
             # Appel API Mistral
             start = time.time()
             resp = self.client.chat.complete(
                 model="mistral-small-latest",
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {
-                        "role": "user",
-                        "content": f"Contexte patient: {context}\n\nQuelle est ta question ?",
-                    },
+                    {"role": "user", "content": user_content},
                 ],
                 temperature=0.4,
                 max_tokens=100,
@@ -210,6 +242,23 @@ Contexte médical de référence (utilise ces informations pour guider tes quest
 
     def _ask_with_rules(self, step: str) -> str:
         """Fallback règles."""
+        if step == "followup":
+            # Rotation de questions pour éviter les répétitions
+            followup_questions = [
+                "Depuis combien de temps avez-vous ces symptômes ?",
+                "Avez-vous des antécédents médicaux ou des maladies chroniques ?",
+                "Prenez-vous des médicaments en ce moment ?",
+                "Avez-vous des allergies connues ?",
+                "La douleur s'est-elle aggravée, améliorée, ou stabilisée depuis le début ?",
+                "Avez-vous d'autres symptômes associés ?",
+                "Y a-t-il des facteurs qui soulagent ou aggravent vos symptômes ?",
+            ]
+            asked = [m["content"] for m in self.data["messages"] if m["role"] == "assistant"]
+            for q in followup_questions:
+                if not any(q[:30] in a for a in asked):
+                    return q
+            return "Y a-t-il autre chose que vous souhaitez me signaler ?"
+
         responses = {
             "identity": "Précisez votre âge et sexe.\nExemple : 25 ans homme",
             "symptoms": "Quel est votre symptôme ?\nExemple : mal de tête / fièvre",
@@ -447,4 +496,5 @@ Contexte médical de référence (utilise ces informations pour guider tes quest
             "symptoms": [],
             "vitals": {},
             "messages": [],
+            "question_count": 0,
         }

@@ -4,13 +4,13 @@ Workflow de simulation AMÉLIORÉ avec questions pertinentes
 
 from typing import Optional
 
-from ..agents.patient_generator import PatientGenerator
-from ..agents.patient_simulator import PatientSimulator
-from ..agents.nurse_agent import NurseAgent
-from ..agents.conversation_analyzer import ConversationAnalyzer
-from ..llm.base_llm import BaseLLMProvider
-from ..models.patient import Patient, GravityLevel
-from ..models.conversation import ConversationHistory
+from src.agents.patient_generator import PatientGenerator
+from src.agents.patient_simulator import PatientSimulator
+from src.agents.nurse_agent import NurseAgent
+from src.agents.conversation_analyzer import ConversationAnalyzer
+from src.llm.base_llm import BaseLLMProvider
+from src.models.patient import Patient, GravityLevel
+from src.models.conversation import ConversationHistory
 
 
 class SimulationWorkflow:

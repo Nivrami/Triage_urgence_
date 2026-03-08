@@ -1,6 +1,5 @@
 from .patient import Patient, Constantes, GravityLevel
 from .conversation import Message, MessageRole, ConversationHistory
-from .triage import TriageResult
 
 __all__ = [
     "Patient",
@@ -9,5 +8,4 @@ __all__ = [
     "Message",
     "MessageRole",
     "ConversationHistory",
-    "TriageResult",
 ]

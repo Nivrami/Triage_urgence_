@@ -5,22 +5,29 @@ venv/
 env/
 
 # Python
-__pycache__/
+**/__pycache__/
 *.py[cod]
 *.egg-info/
 dist/
 build/
 
-# Data
-data/vectors/
-data/processed/
+# Data - bases vectorielles et logs générés
+data/vector_db/
 data/test_*/
-*.csv
-*.json
+data/demo_rag_db/
+data/conversations/
+data/monitoring/
+
+# Modèles et datasets binaires
+data/models/*.pkl
+
+# Windows
+nul
 
 # IDE
 .vscode/
 .idea/
+.claude/
 
 # Jupyter
 .ipynb_checkpoints/

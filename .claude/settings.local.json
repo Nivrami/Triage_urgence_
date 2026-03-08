@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(python test_embeddings.py:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(git checkout:*)",
+      "Bash(git reset:*)",
+      "Bash(git branch:*)",
+      "Bash(gh repo view:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(git merge:*)",
+      "Bash(black:*)",
+      "Bash(pylint:*)",
+      "Bash(git commit:*)",
+      "Bash(streamlit run:*)",
+      "Bash(Get-ChildItem -Recurse -Directory -Filter \"__pycache__\")",
+      "Bash(python -c \":*)"
+    ]
+  }
+}

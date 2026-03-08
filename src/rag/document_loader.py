@@ -51,7 +51,7 @@ class DocumentLoader:
 
         if suffix == ".pdf":
             return self._load_pdf(file_path)
-        elif suffix == ".txt":
+        elif suffix in (".txt", ".md"):
             return self._load_txt(file_path)
         elif suffix == ".json":
             return self._load_json(file_path)
@@ -183,7 +183,7 @@ class DocumentLoader:
             raise FileNotFoundError(f"Répertoire non trouvé: {dir_path}")
 
         if extensions is None:
-            extensions = [".pdf", ".txt", ".json", ".csv"]
+            extensions = [".pdf", ".txt", ".md", ".json", ".csv"]
 
         documents = []
 

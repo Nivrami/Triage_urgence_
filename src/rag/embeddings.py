@@ -18,6 +18,8 @@ class EmbeddingProvider:
     SUPPORTED_MODELS = {
         "all-MiniLM-L6-v2": {"dim": 384, "type": "sentence-transformers"},
         "paraphrase-multilingual-MiniLM-L12-v2": {"dim": 384, "type": "sentence-transformers"},
+        "paraphrase-multilingual-mpnet-base-v2": {"dim": 768, "type": "sentence-transformers"},
+        "FremyCompany/BioLORD-2023-M": {"dim": 768, "type": "sentence-transformers"},
         "text-embedding-3-small": {"dim": 1536, "type": "openai"},
         "text-embedding-3-large": {"dim": 3072, "type": "openai"},
     }
@@ -128,11 +130,3 @@ class EmbeddingProvider:
             "dimension": self.model_info["dim"],
             "type": self.model_type,
         }
-
-    def _load_sentence_transformer(self, model_name: str) -> None:
-        """Charge un modèle sentence-transformers."""
-        pass
-
-    def _load_openai_embeddings(self, api_key: str) -> None:
-        """Configure les embeddings OpenAI."""
-        pass
