@@ -39,8 +39,4 @@ nul
 .DS_Store
 *.log
 
-#Images
-accueil.png
-chatbot.png
-chatbot_ML.png
-simulation.png
+
