@@ -6,10 +6,10 @@ Système conversationnel d'aide au triage aux urgences combinant un agent LLM (M
 
 ## Aperçu
 
-![Accueil](accueil.png)
-![Simulation](simulation.png)
-![Chatbot](chatbot.png)
-![Prediction](chatbot_ML.png)
+![Accueil](screenshots/accueil.png)
+![Simulation](screenshots/simulation.png)
+![Chatbot](screenshots/chatbot.png)
+![Prediction](screenshots/chatbot_ML.png)
 ---
 
 ## Fonctionnalités
