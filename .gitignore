@@ -20,6 +20,9 @@ data/test_*/
 data/demo_rag_db/
 data/conversations/
 data/monitoring/
+**/data/vector_db/
+**/data/test_*/
+**/data/demo_rag_db/
 
 # Modèles et datasets binaires
 data/models/*.pkl

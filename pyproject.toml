@@ -49,10 +49,14 @@ max-locals = 20
 # Pytest - Configuration des tests
 # -----------------------------------------------------------------------------
 [tool.pytest.ini_options]
+pythonpath = ["."]
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_functions = ["test_*"]
-addopts = "-v --tb=short"
+addopts = "-v --tb=short -m 'not slow'"
+markers = [
+    "slow: tests chargeant le vrai modèle d'embeddings (sentence-transformers)",
+]
 
 # -----------------------------------------------------------------------------
 # MyPy - Configuration du type checking

@@ -58,7 +58,7 @@ Système conversationnel d'aide au triage aux urgences combinant un agent LLM (M
               ▼                             ▼
 ┌─────────────────────────┐   ┌─────────────────────────────────┐
 │        MODULE RAG       │   │          MODULE ML              │
-│  (src/rag/)             │   │  (src/rag/predictor.py)         │
+│  (src/rag/)             │   │  (src/ml/predictor.py)          │
 │                         │   │                                 │
 │  DocumentLoader         │   │  Random Forest (sklearn)        │
 │    → chunking docs      │   │  18 features :                  │
@@ -116,7 +116,8 @@ Triage_urgence_bis/
 │   │   ├── nurse_agent.py            # Agent infirmier LLM
 │   │   ├── patient_simulator.py      # Simulateur de patient
 │   │   ├── patient_generator.py      # Générateur de cas cliniques
-│   │   └── conversation_analyzer.py  # Analyse de conversation
+│   │   ├── conversation_analyzer.py  # Analyse de conversation
+│   │   └── simulation_workflow.py    # Orchestration simulation complète
 │   │
 │   ├── llm/
 │   │   ├── mistral_provider.py       # Provider Mistral API
@@ -125,10 +126,12 @@ Triage_urgence_bis/
 │   │
 │   ├── rag/
 │   │   ├── chatbot.py                # Chatbot Mistral + RAG
-│   │   ├── predictor.py              # Prédicteur ML + RAG (Random Forest)
 │   │   ├── embeddings.py             # Texte → vecteurs (sentence-transformers)
 │   │   ├── vector_store.py           # VectorStore + Retriever (ChromaDB)
 │   │   └── document_loader.py        # Chargement et chunking des documents
+│   │
+│   ├── ml/
+│   │   └── predictor.py              # Prédicteur ML + RAG (Random Forest)
 │   │
 │   ├── models/
 │   │   ├── patient.py                # Modèle de données patient (Pydantic)
@@ -138,16 +141,24 @@ Triage_urgence_bis/
 │   │   ├── metrics_tracker.py        # Tracking prédictions et latences
 │   │   └── cost_calculator.py        # Calcul coûts API Mistral
 │   │
-│   ├── config/
-│   │   ├── settings.py               # Configuration globale
-│   │   └── prompts.py                # Prompts système
-│   │
-│   └── simulation_workflow.py        # Orchestration simulation complète
+│   └── config/
+│       ├── settings.py               # Configuration globale
+│       └── prompts.py                # Prompts système
+│
+├── tests/
+│   ├── unit/                         # Tests rapides, sans modèle réel
+│   └── integration/                  # Tests avec le vrai modèle (marqués slow)
+│
+├── scripts/
+│   └── build_vector_db.py            # Reconstruit la base vectorielle RAG
 │
 ├── data/
 │   ├── models/
 │   │   ├── random_forest_v2.pkl      # Modèle entraîné (18 features)
-│   │   └── triage_dataset_v2.pkl     # Dataset d'entraînement
+│   │   └── random_forest_simple.pkl  # Modèle entraîné (version simplifiée)
+│   ├── datasets/
+│   │   ├── triage_dataset_v2.pkl     # Dataset d'entraînement v2
+│   │   └── triage_dataset_v2.csv     # Dataset v2 (format inspectable)
 │   ├── rag_document/                 # Documents médicaux (PDF, Markdown)
 │   │   ├── protocole_CIMU.pdf
 │   │   ├── categories_triage.pdf
@@ -155,7 +166,7 @@ Triage_urgence_bis/
 │   │   ├── criteres_classification.md
 │   │   ├── protocoles_action.md
 │   │   └── signes_alerte.md
-│   └── vector_db/                    # Base vectorielle ChromaDB (persistante)
+│   └── vector_db/                    # Base vectorielle ChromaDB (générée, non versionnée)
 │
 └── notebooks/
     ├── generate_dataset_v2.ipynb     # Génération du dataset v2
@@ -186,6 +197,9 @@ pip install -r requirements.txt
 # Configurer les variables d'environnement
 cp .env.example .env
 # Editer .env et renseigner MISTRAL_API_KEY=<votre_clé>
+
+# Construire la base vectorielle RAG (non versionnée, générée à partir de data/rag_document/)
+python scripts/build_vector_db.py
 ```
 
 ### Lancement
@@ -193,6 +207,20 @@ cp .env.example .env
 ```bash
 streamlit run app/app.py
 ```
+
+---
+
+## Tests
+
+```bash
+# Tests unitaires (rapides, sans modèle réel — ~3s)
+pytest
+
+# Tests d'intégration (vrai modèle d'embeddings — ~25s)
+pytest -m slow
+```
+
+Les tests unitaires (`tests/unit/`) utilisent un faux embedder déterministe et ne dépendent d'aucun modèle ni réseau. Les tests d'intégration (`tests/integration/`) valident le pipeline RAG complet avec `sentence-transformers`. Exécutés automatiquement via GitHub Actions à chaque push (`.github/workflows/tests.yml`).
 
 ---
 
@@ -217,7 +245,7 @@ Pipeline de Retrieval-Augmented Generation sur une base documentaire de protocol
 
 Le RAG est utilisé à deux niveaux : enrichissement des prompts du NurseAgent pendant la conversation, et enrichissement des recommandations du prédicteur ML au moment du résultat final.
 
-### Prédicteur ML (`src/rag/predictor.py`)
+### Prédicteur ML (`src/ml/predictor.py`)
 
 Classifieur Random Forest (`sklearn`) entraîné sur 18 features :
 
