@@ -30,9 +30,9 @@ from src.agents.patient_simulator import PatientSimulator
 from src.agents.nurse_agent import NurseAgent
 from src.models.conversation import ConversationHistory
 from src.rag.chatbot import TriageChatbotAPI
-from src.rag.predictor import MLTriagePredictor
+from src.ml.predictor import MLTriagePredictor
 from src.rag.vector_store import VectorStore, RAGRetriever
-from src.simulation_workflow import SimulationWorkflow
+from src.agents.simulation_workflow import SimulationWorkflow
 from src.monitoring.metrics_tracker import get_tracker
 from src.monitoring.cost_calculator import get_calculator
 
