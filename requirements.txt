@@ -40,3 +40,4 @@ plotly
 black
 pylint
 pre-commit
+pytest

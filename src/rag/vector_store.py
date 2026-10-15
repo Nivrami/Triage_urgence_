@@ -27,12 +27,15 @@ class VectorStore:
         persist_directory: str = "data/vector_db",
         collection_name: str = "triage_medical",
         embedding_model: str = _DEFAULT_EMBEDDING_MODEL,
+        embedder: Optional[EmbeddingProvider] = None,
     ):
         """
         Args:
             persist_directory: Dossier de persistance ChromaDB
             collection_name: Nom de la collection
             embedding_model: Modèle d'embeddings (français supporté)
+            embedder: Instance d'embedder déjà prête (permet l'injection de
+                dépendance, utile pour les tests avec un faux embedder)
         """
         self.persist_directory = Path(persist_directory)
         self.persist_directory.mkdir(parents=True, exist_ok=True)
@@ -43,10 +46,13 @@ class VectorStore:
             settings=Settings(anonymized_telemetry=False, allow_reset=True),
         )
 
-        # Charger le modele d'embeddings via EmbeddingProvider
-        print(f"[INFO] Chargement modele embeddings: {embedding_model}")
-        self.embedding_model = EmbeddingProvider(model_name=embedding_model)
-        print("[OK] Modele charge")
+        # Utiliser l'embedder fourni, sinon en charger un via EmbeddingProvider
+        if embedder is not None:
+            self.embedding_model = embedder
+        else:
+            print(f"[INFO] Chargement modele embeddings: {embedding_model}")
+            self.embedding_model = EmbeddingProvider(model_name=embedding_model)
+            print("[OK] Modele charge")
 
         # Créer ou récupérer collection
         self.collection_name = collection_name
@@ -54,19 +60,11 @@ class VectorStore:
 
     def _get_or_create_collection(self):
         """Récupère ou crée la collection ChromaDB."""
-        try:
-            # Essayer de récupérer collection existante
-            collection = self.client.get_collection(name=self.collection_name)
-            print(
-                f"[OK] Collection '{self.collection_name}' chargee ({collection.count()} documents)"
-            )
-        except:
-            # Créer nouvelle collection
-            collection = self.client.create_collection(
-                name=self.collection_name,
-                metadata={"description": "Base de connaissances médicales pour triage"},
-            )
-            print(f"[OK] Collection '{self.collection_name}' creee")
+        collection = self.client.get_or_create_collection(
+            name=self.collection_name,
+            metadata={"description": "Base de connaissances médicales pour triage"},
+        )
+        print(f"[OK] Collection '{self.collection_name}' prete ({collection.count()} documents)")
 
         return collection
 
