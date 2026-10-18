@@ -1,5 +1,7 @@
 # Triage Urgences — Système d'aide au triage hospitalier par LLM
 
+[![Tests](https://github.com/Nivrami/Triage_urgence_/actions/workflows/tests.yml/badge.svg)](https://github.com/Nivrami/Triage_urgence_/actions/workflows/tests.yml) ![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white) ![Mistral AI](https://img.shields.io/badge/Mistral%20AI-FA520F?logo=mistralai&logoColor=white) ![ChromaDB](https://img.shields.io/badge/ChromaDB-FF6446) ![Pydantic](https://img.shields.io/badge/Pydantic-E92063?logo=pydantic&logoColor=white) ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white) ![pytest](https://img.shields.io/badge/pytest-0A9EDC?logo=pytest&logoColor=white)
+
 Système conversationnel d'aide au triage aux urgences combinant un agent LLM (Mistral), un module RAG sur protocoles médicaux, et un classifieur Random Forest pour produire une évaluation de gravité structurée.
 
 ---
